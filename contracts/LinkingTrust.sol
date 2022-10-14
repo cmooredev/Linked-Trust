@@ -90,6 +90,7 @@ contract LinkingTrust {
     function setBeneficiary(address _beneficiary, uint _trustID) public payable {
         Trust storage trust = trusts[_trustID];
         //must be a proposed beneficiary that has been approved by both authorizedOne and authorizedTwo
+        require(msg.sender == trust.creator);
         require(trust.proposedBeneficiaryApproval[_beneficiary] == true, "Must be approved beneficiary to add");
         //add proposed beneficiary to beneficiaries array
         trust.beneficiaryList.push(_beneficiary);
