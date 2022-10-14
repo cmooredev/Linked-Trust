@@ -3,48 +3,6 @@ pragma solidity ^0.8.9;
 
 contract LinkingTrust {
 
-    //contract owner
-    address public owner;
-
-    //total number of trusts
-    uint public totalNumberOfTrusts;
-
-    struct TrustFunder {
-      uint amount;
-      uint timestamp;
-    }
-
-    //struct to hold a new Trust
-    struct Trust {
-      //conditions to unlock funds
-      uint unlockTime;
-      uint unlockPrice;
-
-      //mapping of funders
-      mapping(address => TrustFunder) funders;
-
-      //creator of trust
-      address creator;
-
-      //trust board - additional 'owners' of the trust.
-      //owner must get approval from both - but can override both with single vote from owner
-      address authorizedOne;
-      address authorizedTwo;
-      mapping(address => bool) authorizedUserApprovalStatus;
-
-      //new beneficiary to authorize
-      address proposedBeneficiary;
-      mapping(address => bool) proposedBeneficiaryApproval;
-
-      //beneficiaries and percentage
-      address[] beneficiaryList;
-      mapping(address => bool) beneficiaries;
-      mapping(address => uint) beneficiaryPercent;
-    }
-
-    //mapping of trusts
-    mapping(uint => Trust) public trusts;
-
     //emit when new trust is created
     event NewTrust(uint trustID, uint when, address creator);
     //emit when a new beneficiary is set
@@ -53,8 +11,56 @@ contract LinkingTrust {
     event NewProposedBeneficiary(uint trustID, address beneficiary);
     //emit when authorized user votes
     event NewProposalVote(uint trustID, bool vote, address authorizedUser);
+    //emit when trust is funded
+    event TrustFunded(uint trustID, address funder, uint amount);
     //emit event upon withdrawal of funds
     event Withdrawal(uint amount, uint when, address who);
+
+    //contract owner
+    address public owner;
+
+    //total number of trusts
+    uint public totalNumberOfTrusts;
+
+    struct TrustFunder {
+        uint amount;
+        uint timeFunded;
+    }
+
+    //struct to hold a new Trust
+    struct Trust {
+
+        //current trust value
+        uint currentValue;
+
+        //conditions to unlock funds
+        uint unlockTime;
+        uint unlockPrice;
+
+        //mapping of funders
+        mapping(address => TrustFunder) funders;
+
+        //creator of trust
+        address creator;
+
+        //trust board - additional 'owners' of the trust.
+        //owner must get approval from both - but can override both with single vote from owner
+        address authorizedOne;
+        address authorizedTwo;
+        mapping(address => bool) authorizedUserApprovalStatus;
+
+        //new beneficiary to authorize
+        address proposedBeneficiary;
+        mapping(address => bool) proposedBeneficiaryApproval;
+        mapping(address => bool) hasBeneficiaryAlreadyWithdrawn;
+
+        //beneficiaries and percentage
+        address[] beneficiaryList;
+        mapping(address => bool) beneficiaries;
+    }
+
+    //mapping of trusts
+    mapping(uint => Trust) public trusts;
 
     //set unlock: time, price, beneficiaries
     constructor() payable {
@@ -131,14 +137,29 @@ contract LinkingTrust {
         return trusts[_trustID].beneficiaryList;
     }
 
+    //allow anyone to fund a trust
+    function fundTrust(uint _trustID) public payable {
+        //grab instance of the trust
+        Trust storage trust = trusts[_trustID];
+        //grab instance of funder
+        TrustFunder storage funder = trust.funders[msg.sender];
+        //adjust current trust value
+        trust.currentValue += msg.value;
+        //set funders contribution and time of funding
+        funder.amount = msg.value;
+        funder.timeFunded = block.timestamp;
+        emit TrustFunded(_trustID, msg.sender, msg.value);
+    }
+
     function withdraw(uint _trustID) public {
         Trust storage trust = trusts[_trustID];
         require(block.timestamp >= trust.unlockTime, "You can't withdraw yet");
         require(trust.beneficiaries[msg.sender], "Not a valid beneficiary");
+        require(!trust.hasBeneficiaryAlreadyWithdrawn[msg.sender], "You have already withdrawn your portion of funds");
 
-        emit Withdrawal(address(this).balance, block.timestamp, msg.sender);
-
-        payable(msg.sender).transfer(address(this).balance);
+        emit Withdrawal(trust.currentValue / trust.beneficiaryList.length, block.timestamp, msg.sender);
+        trust.hasBeneficiaryAlreadyWithdrawn[msg.sender] = true;
+        payable(msg.sender).transfer(trust.currentValue/trust.beneficiaryList.length);
     }
 
     receive() external payable{}
