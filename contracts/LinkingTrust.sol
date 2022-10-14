@@ -37,7 +37,8 @@ contract LinkingTrust {
       mapping(address => bool) proposedBeneficiaryApproval;
 
       //beneficiaries and percentage
-      address[] beneficiaries;
+      address[] beneficiaryList;
+      mapping(address => bool) beneficiaries;
       mapping(address => uint) beneficiaryPercent;
     }
 
@@ -46,8 +47,12 @@ contract LinkingTrust {
 
     //emit when new trust is created
     event NewTrust(uint trustID, uint when, address creator);
-    //
-
+    //emit when a new beneficiary is set
+    event NewBeneficiary(uint trustID, address beneficiary);
+    //emit when a new beneficiary is proposed
+    event NewProposedBeneficiary(uint trustID, address beneficiary);
+    //emit when authorized user votes
+    event NewProposalVote(uint trustID, bool vote, address authorizedUser);
     //emit event upon withdrawal of funds
     event Withdrawal(uint amount, uint when, address who);
 
@@ -68,17 +73,25 @@ contract LinkingTrust {
         trust.authorizedTwo = _authorizedTwo;
         trust.creator = msg.sender;
         trust.proposedBeneficiary = payable(address(0));
+        //emit event
         emit NewTrust(totalNumberOfTrusts, block.timestamp, msg.sender);
+        //increment total number of trusts
         totalNumberOfTrusts += 1;
 
     }
 
     //add a beneficiary to the trust
-    //must be a proposed beneficiary that has been approved by both authorizedOne and authorizedTwo
     function setBeneficiary(address _beneficiary, uint _trustID) public payable {
         Trust storage trust = trusts[_trustID];
+        //must be a proposed beneficiary that has been approved by both authorizedOne and authorizedTwo
         require(trust.proposedBeneficiaryApproval[_beneficiary] == true, "Must be approved beneficiary to add");
-        trust.beneficiaries.push(_beneficiary);
+        //add proposed beneficiary to beneficiaries array
+        trust.beneficiaryList.push(_beneficiary);
+        trust.beneficiaries[_beneficiary] = true;
+        //emit event
+        emit NewBeneficiary(_trustID, _beneficiary);
+        //set trust's proposed beneficiary back to 0
+        trust.proposedBeneficiary = payable(address(0));
     }
 
     //trust owner can propose an new beneficiary
@@ -86,8 +99,12 @@ contract LinkingTrust {
         Trust storage trust = trusts[_trustID];
         //must be no other beneficiaries waiting for approval
         require(trust.proposedBeneficiary == payable(address(0)), "Must approve or deny current proposal");
+        //must be the owner of the trust to propose a new beneficiary
         require(msg.sender == trust.creator, "Must be owner of trust to propose beneficiary");
+
         trust.proposedBeneficiary = _beneficiary;
+        //emit event
+        emit NewProposedBeneficiary(_trustID, _beneficiary);
     }
 
     //authorized user and either cast their approval or denial vote for the current proposedBeneficiary
@@ -100,17 +117,20 @@ contract LinkingTrust {
         if(!vote) {
             trust.proposedBeneficiary = payable(address(0));
         } else {
+            //if authorized user votes 'yes', set approval status to true
             trust.authorizedUserApprovalStatus[msg.sender] = true;
         }
+        emit NewProposalVote(_trustID, vote, msg.sender);
     }
 
     function getTrustBeneficiaries(uint _trustID) public view returns (address[] memory){
-        return trusts[_trustID].beneficiaries;
+        return trusts[_trustID].beneficiaryList;
     }
 
-    function withdraw() public {
-        //require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        //require(beneficiaries[msg.sender], "Not a valid beneficiary");
+    function withdraw(uint _trustID) public {
+        Trust storage trust = trusts[_trustID];
+        require(block.timestamp >= trust.unlockTime, "You can't withdraw yet");
+        require(trust.beneficiaries[msg.sender], "Not a valid beneficiary");
 
         emit Withdrawal(address(this).balance, block.timestamp, msg.sender);
 
