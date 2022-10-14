@@ -120,6 +120,10 @@ contract LinkingTrust {
             //if authorized user votes 'yes', set approval status to true
             trust.authorizedUserApprovalStatus[msg.sender] = true;
         }
+
+        if(trust.authorizedUserApprovalStatus[trust.authorizedOne] == true && trust.authorizedUserApprovalStatus[trust.authorizedTwo] == true) {
+            trust.proposedBeneficiaryApproval[trust.proposedBeneficiary] = true;
+        }
         emit NewProposalVote(_trustID, vote, msg.sender);
     }
 
