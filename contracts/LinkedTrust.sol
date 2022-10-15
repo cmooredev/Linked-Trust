@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-contract LinkingTrust {
+contract LinkedTrust {
 
     //emit when new trust is created
     event NewTrust(uint trustID, uint when, address creator);
@@ -141,6 +141,21 @@ contract LinkingTrust {
     function getTrustUnlockTime(uint _trustID) public view returns (uint){
         Trust storage trust = trusts[_trustID];
         return trust.unlockTime;
+    }
+
+    function getTrustAuthorizedUsers(uint _trustID) public view returns (address, address) {
+        Trust storage trust = trusts[_trustID];
+        return (trust.authorizedOne, trust.authorizedTwo);
+    }
+
+    function getTrustCreator(uint _trustID) public view returns (address) {
+        Trust storage trust = trusts[_trustID];
+        return (trust.creator);
+    }
+
+    function getTrustUnlockPrice(uint _trustID) public view returns (uint) {
+        Trust storage trust = trusts[_trustID];
+        return (trust.unlockPrice);
     }
 
     //allow anyone to fund a trust
