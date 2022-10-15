@@ -4,12 +4,12 @@ import Web3Modal from "web3modal";
 import { ethers, providers, Contract } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import { LINKED_TRUST_CONTRACT_ADDRESS, abi } from "../constants";
-import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend} from 'chart.js';
-
-ChartJS.register(ArcElement, Tooltip, Legend);
+import { useRouter } from 'next/router';
 
 export default function Home() {
+
+  //next router
+  const router = useRouter()
 
   //connect wallet
   const [walletConnected, setWalletConnected] = useState(false);
@@ -52,6 +52,7 @@ export default function Home() {
   };
 
   const newTrust = async (e) => {
+    let id = '';
     try {
       console.log(`${trustParam.auth_one}`);
       const signer = await getProviderOrSigner(true);
@@ -66,13 +67,22 @@ export default function Home() {
       );
       setLoading(true);
       linkingTrustContract.on("NewTrust", (trustID, when, creator) => {
-        console.log(trustID.toString(), when.toString(), creator);
+        id = trustID.toString();
+        setTrustParam( prevTrustParam => ({...prevTrustParam, id}));
+        router.push({
+          pathname: '/trust',
+          query: { trust_name: trustParam.trust_name,
+                   trust_id : id,
+                   unlock_time: trustParam.unlock_time,
+                   unlock_price: trustParam.unlock_price,
+                   auth_one: trustParam.auth_one,
+                   auth_two: trustParam.auth_two,
+          }
+        }, '/trust')
       });
       await tx.wait();
-
       setLoading(false);
       setNewTrustCreated(true);
-
     } catch (err) {
       console.error(err);
     }
@@ -90,18 +100,8 @@ export default function Home() {
 
   const renderTrustForm = () => {
     if (walletConnected) {
-      if (newTrustCreated) {
-        return (
-          <div className={styles.description}>
-            New trust created.
-            Name
-            <p>{trustParam.trust_name}</p>
-            Time
-            <p>{trustParam.unlock_time}</p>
-          </div>
-        );
-      } else if (loading) {
-        return <button className={styles.button}>Loading...</button>;
+      if (loading) {
+        return <div className={styles.loading}><h2>Creating New Trust...</h2></div>;
       } else {
         return (
           <div>
@@ -147,37 +147,6 @@ export default function Home() {
     }
   };
 
-  const renderChart = () => {
-    const data = {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [
-          {
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)',
-              'rgba(255, 159, 64, 0.2)',
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-            ],
-            borderWidth: 1,
-          },
-        ],
-      };
-
-      return (<Doughnut data={data}/>);
-  };
-
   useEffect(() => {
     if (!walletConnected) {
       web3ModalRef.current = new Web3Modal({
@@ -203,7 +172,6 @@ export default function Home() {
           A platform for creating decentralized trusts.
         </div>
         {renderTrustForm()}
-        {renderChart()}
         <canvas id="chart"></canvas>
       </div>
     </div>
