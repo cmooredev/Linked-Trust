@@ -1,9 +1,13 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import Web3Modal from "web3modal";
-import { providers, Contract } from "ethers";
+import { ethers, providers, Contract } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import { LINKED_TRUST_CONTRACT_ADDRESS, abi } from "../constants";
+import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Home() {
 
@@ -13,6 +17,16 @@ export default function Home() {
   //keep track of creating new trusts
   const [newTrustCreated, setNewTrustCreated] = useState(false);
 
+  //keep track of trust values
+  const [trustParam, setTrustParam] = useState(
+    {
+      trust_name: "",
+      unlock_time: "",
+      unlock_price: "",
+      auth_one: "",
+      auth_two: "",
+      trust_id: ""
+  });
 
   //loading when waiting for transaction
   const [loading, setLoading] = useState(false);
@@ -37,20 +51,28 @@ export default function Home() {
     return web3Provider;
   };
 
-  const newTrust = async () => {
+  const newTrust = async (e) => {
     try {
+      console.log(`${trustParam.auth_one}`);
       const signer = await getProviderOrSigner(true);
       const linkingTrustContract = new Contract(
         LINKED_TRUST_CONTRACT_ADDRESS,
         abi,
         signer
       );
-
-      const tx = await linkingTrustContract.createNewTrust(1000000000000, 1, "0xdfFA7d99A0C0DCF059C4a3E5c47AA9B90aAb2a1d", "0xdfFA7d99A0C0DCF059C4a3E5c47AA9B90aAb2a1d");
+      console.log(trustParam.unlock_time);
+      const tx = await linkingTrustContract.createNewTrust(
+        trustParam.unlock_time, trustParam.unlock_price, trustParam.auth_one, trustParam.auth_two
+      );
       setLoading(true);
+      linkingTrustContract.on("NewTrust", (trustID, when, creator) => {
+        console.log(trustID.toString(), when.toString(), creator);
+      });
       await tx.wait();
+
       setLoading(false);
       setNewTrustCreated(true);
+
     } catch (err) {
       console.error(err);
     }
@@ -66,32 +88,53 @@ export default function Home() {
     }
   };
 
-  const renderButton = () => {
+  const renderTrustForm = () => {
     if (walletConnected) {
       if (newTrustCreated) {
         return (
           <div className={styles.description}>
             New trust created.
+            Name
+            <p>{trustParam.trust_name}</p>
+            Time
+            <p>{trustParam.unlock_time}</p>
           </div>
         );
       } else if (loading) {
         return <button className={styles.button}>Loading...</button>;
       } else {
         return (
-          <div className={styles.form}>
-          <form>
-            <label className={styles.label} for="name">Trust name:</label>
-            <input className={styles.input} type="text" id="name" name="name" />
-            <label className={styles.label} for="date">Unlock Date:</label>
-            <input className={styles.input} type="text" id="date" name="date" />
-            <label className={styles.label} for="price">Unlock Price:</label>
-            <input className={styles.input} type="text" id="price" name="price" />
-            <label className={styles.label} for="authOne">Authorized User:</label>
-            <input className={styles.input} type="text" id="authOne" name="authOne" />
-            <label className={styles.label} for="authTwo">Authorized User:</label>
-            <input className={styles.input} type="text" id="authTwo" name="authTwo" />
-            <button onClick={newTrust} className={styles.submit}>Submit</button>
-          </form>
+          <div>
+            <div className={styles.form}>
+              <label className={styles.label} for="name">Trust name:</label>
+              <input className={styles.input} type="text" id="name" name="name"
+              onChange={e => {
+                setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: e.target.value}));
+              }} />
+              <label className={styles.label} for="time">Unlock Time:</label>
+              <input className={styles.input} type="text" id="time" name="time"
+              onChange={e => {
+                setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: e.target.value}));
+              }} />
+              <label className={styles.label} for="price">Unlock Price:</label>
+              <input className={styles.input} type="text" id="price" name="price"
+              onChange={e => {
+                setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: e.target.value}));
+              }} />
+              <label className={styles.label} for="authOne">Authorized User:</label>
+              <input className={styles.input} type="text" id="authOne" name="authOne"
+              onChange={e => {
+                setTrustParam( prevTrustParam => ({...prevTrustParam, auth_one: e.target.value}));
+              }} />
+              <label className={styles.label} for="authTwo">Authorized User:</label>
+              <input className={styles.input} type="text" id="authTwo" name="authTwo"
+              onChange={e => {
+                setTrustParam( prevTrustParam => ({...prevTrustParam, auth_two: e.target.value}));
+              }} />
+            </div>
+            <div className={styles.buttonDiv}>
+              <button onClick={newTrust} className={styles.submit}>Submit</button>
+            </div>
           </div>
         );
       }
@@ -104,6 +147,37 @@ export default function Home() {
     }
   };
 
+  const renderChart = () => {
+    const data = {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [
+          {
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ],
+      };
+
+      return (<Doughnut data={data}/>);
+  };
+
   useEffect(() => {
     if (!walletConnected) {
       web3ModalRef.current = new Web3Modal({
@@ -114,8 +188,6 @@ export default function Home() {
       connectWallet();
     }
   }, [walletConnected]);
-
-
 
   return (
   <div>
@@ -130,7 +202,9 @@ export default function Home() {
         <div className={styles.description}>
           A platform for creating decentralized trusts.
         </div>
-        {renderButton()}
+        {renderTrustForm()}
+        {renderChart()}
+        <canvas id="chart"></canvas>
       </div>
     </div>
 
