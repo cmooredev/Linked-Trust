@@ -138,6 +138,11 @@ contract LinkingTrust {
         return trusts[_trustID].beneficiaryList;
     }
 
+    function getTrustUnlockTime(uint _trustID) public view returns (uint){
+        Trust storage trust = trusts[_trustID];
+        return trust.unlockTime;
+    }
+
     //allow anyone to fund a trust
     function fundTrust(uint _trustID) public payable {
         //grab instance of the trust
