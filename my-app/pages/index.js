@@ -54,14 +54,12 @@ export default function Home() {
   const newTrust = async (e) => {
     let id = '';
     try {
-      console.log(`${trustParam.auth_one}`);
       const signer = await getProviderOrSigner(true);
       const linkingTrustContract = new Contract(
         LINKED_TRUST_CONTRACT_ADDRESS,
         abi,
         signer
       );
-      console.log(trustParam.unlock_time);
       const tx = await linkingTrustContract.createNewTrust(
         trustParam.unlock_time, trustParam.unlock_price, trustParam.auth_one, trustParam.auth_two
       );
@@ -112,9 +110,11 @@ export default function Home() {
                 setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: e.target.value}));
               }} />
               <label className={styles.label} for="time">Unlock Time:</label>
-              <input className={styles.input} type="text" id="time" name="time"
+              <input className={styles.input} type="datetime-local" id="time" name="time"
               onChange={e => {
-                setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: e.target.value}));
+                let dateToUnix = +new Date(e.target.value);
+                console.log('first ' + dateToUnix);
+                setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: dateToUnix }));
               }} />
               <label className={styles.label} for="price">Unlock Price:</label>
               <input className={styles.input} type="text" id="price" name="price"
@@ -122,12 +122,12 @@ export default function Home() {
                 setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: e.target.value}));
               }} />
               <label className={styles.label} for="authOne">Authorized User:</label>
-              <input className={styles.input} type="text" id="authOne" name="authOne"
+              <input className={styles.input, styles.address} type="text" id="authOne" name="authOne"
               onChange={e => {
                 setTrustParam( prevTrustParam => ({...prevTrustParam, auth_one: e.target.value}));
               }} />
               <label className={styles.label} for="authTwo">Authorized User:</label>
-              <input className={styles.input} type="text" id="authTwo" name="authTwo"
+              <input className={styles.input, styles.address} type="text" id="authTwo" name="authTwo"
               onChange={e => {
                 setTrustParam( prevTrustParam => ({...prevTrustParam, auth_two: e.target.value}));
               }} />
