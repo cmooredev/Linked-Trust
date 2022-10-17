@@ -13,11 +13,9 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 export default function Trust() {
   const router = useRouter();
 
-  const {trust_name, unlock_time, unlock_price, auth_one, auth_two, trust_id} = router.query;
-  console.log(`ok here we are ${unlock_time}`)
+  const {trust_name, unlock_time, unlock_price, trust_id} = router.query;
   let unlock_unix_timestamp = +unlock_time;
   let date = new Date(unlock_unix_timestamp);
-  console.log(date.toLocaleString());
 
   //connect wallet
   const [walletConnected, setWalletConnected] = useState(false);
@@ -45,18 +43,28 @@ export default function Trust() {
     return web3Provider;
   };
 
+  const connectWallet = async () => {
+    try {
+      await getProviderOrSigner();
+      setWalletConnected(true);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   const renderChart = () => {
     const data = {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: ['Red', 'Blue', 'Yellow'],
         datasets: [
           {
             label: '# of Votes',
             data: [12, 19, 3],
             backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)',
+              'rgba(255, 99, 132, 0.8)',
+              'rgba(54, 162, 235, 0.8)',
+              'rgba(255, 206, 86, 0.8)',
             ],
             borderColor: [
               'rgba(255, 99, 132, 1)',
@@ -68,7 +76,46 @@ export default function Trust() {
         ],
       };
 
-      return (<Doughnut data={data}/>);
+      return (
+
+        <div>
+          <Head>
+            <title>LinkedTrust</title>
+            <meta name="description" content="Decentralized Trust" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
+          <div className={styles.main}>
+            <div className={styles.intro}>
+              <div className={styles.description}>
+                <p>Name: {trust_name}</p>
+                <p>Unlock Time: {date.toLocaleString()}</p>
+                <p>Unlock Price: {unlock_price}</p>
+                <p>Trust ID: {trust_id}</p>
+              </div>
+            </div>
+            <div>
+              <Doughnut data={data} className="styles.data"/>
+            </div>
+          </div>
+        </div>
+
+      );
+
+
+      // if (!walletConnected) {
+      //   if (loading) {
+      //     return <div className={styles.loading}><h2>Creating New Trust...</h2></div>;
+      //   } else {
+      //
+      //   }
+      // } else {
+      //   return (
+      //     <button onClick={connectWallet} className={styles.button}>
+      //       Connect your wallet
+      //     </button>
+      //   );
+      // }
+
   };
 
   return (
@@ -80,21 +127,10 @@ export default function Trust() {
     </Head>
     <div className={styles.main}>
       <div>
-        <h1 className={styles.title}>LinkedTrust</h1>
-        <div className={styles.description}>
-          <p>Name: {trust_name}</p>
-          <p>Unlock Time: {date.toLocaleString()}</p>
-          <p>Unlock Price: {unlock_price}</p>
-          <p>Trust ID: {trust_id}</p>
-        </div>
         {renderChart()}
         <canvas id="chart"></canvas>
       </div>
     </div>
-
-    <footer className={styles.footer}>
-      Made with &#10084; by cmoorelabs
-    </footer>
   </div>
   );
 };

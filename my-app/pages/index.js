@@ -23,8 +23,6 @@ export default function Home() {
       trust_name: "",
       unlock_time: "",
       unlock_price: "",
-      auth_one: "",
-      auth_two: "",
       trust_id: ""
   });
 
@@ -52,6 +50,7 @@ export default function Home() {
   };
 
   const newTrust = async (e) => {
+
     let id = '';
     try {
       const signer = await getProviderOrSigner(true);
@@ -60,8 +59,9 @@ export default function Home() {
         abi,
         signer
       );
+
       const tx = await linkingTrustContract.createNewTrust(
-        trustParam.unlock_time, trustParam.unlock_price, trustParam.auth_one, trustParam.auth_two
+        trustParam.unlock_time, trustParam.unlock_price
       );
       setLoading(true);
       linkingTrustContract.on("NewTrust", (trustID, when, creator) => {
@@ -73,8 +73,6 @@ export default function Home() {
                    trust_id : id,
                    unlock_time: trustParam.unlock_time,
                    unlock_price: trustParam.unlock_price,
-                   auth_one: trustParam.auth_one,
-                   auth_two: trustParam.auth_two,
           }
         }, '/trust')
       });
@@ -99,43 +97,52 @@ export default function Home() {
   const renderTrustForm = () => {
     if (walletConnected) {
       if (loading) {
-        return <div className={styles.loading}><h2>Creating New Trust...</h2></div>;
+        return (
+          <div className={styles.main}>
+            <div className={styles.loading}>
+              <h2>Creating New Trust...</h2>
+              <p>Please Wait</p>
+            </div>;
+          </div>
+        );
       } else {
         return (
-          <div>
-            <div className={styles.form}>
-              <label className={styles.label} for="name">Trust name:</label>
-              <input className={styles.input} type="text" id="name" name="name"
-              onChange={e => {
-                setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: e.target.value}));
-              }} />
-              <label className={styles.label} for="time">Unlock Time:</label>
-              <input className={styles.input} type="datetime-local" id="time" name="time"
-              onChange={e => {
-                let dateToUnix = +new Date(e.target.value);
-                console.log('first ' + dateToUnix);
-                setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: dateToUnix }));
-              }} />
-              <label className={styles.label} for="price">Unlock Price:</label>
-              <input className={styles.input} type="text" id="price" name="price"
-              onChange={e => {
-                setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: e.target.value}));
-              }} />
-              <label className={styles.label} for="authOne">Authorized User:</label>
-              <input className={styles.input, styles.address} type="text" id="authOne" name="authOne"
-              onChange={e => {
-                setTrustParam( prevTrustParam => ({...prevTrustParam, auth_one: e.target.value}));
-              }} />
-              <label className={styles.label} for="authTwo">Authorized User:</label>
-              <input className={styles.input, styles.address} type="text" id="authTwo" name="authTwo"
-              onChange={e => {
-                setTrustParam( prevTrustParam => ({...prevTrustParam, auth_two: e.target.value}));
-              }} />
+
+          <div className={styles.main}>
+            <div className={styles.intro}>
+              <h1 className={styles.title}>Welcome to LinkedTrust!</h1>
+              <div className={styles.description}>
+                A platform for creating decentralized trusts.
+              </div>
             </div>
-            <div className={styles.buttonDiv}>
-              <button onClick={newTrust} className={styles.submit}>Submit</button>
+            <div className={styles.card}>
+              <div className={styles.formcontainer}>
+              <div className={styles.form}>
+                <label className={styles.label} for="name">Trust name</label>
+                <input className={styles.input} type="text" id="name" name="name"
+                onChange={e => {
+                  setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: e.target.value}));
+                }} />
+                <label className={styles.label} for="time">Unlock Time</label>
+                <input className={styles.input} type="datetime-local" id="time" name="time"
+                onChange={e => {
+                  let dateToUnix = +new Date(e.target.value);
+                  console.log('first ' + dateToUnix);
+                  setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: dateToUnix }));
+                }} />
+                <label className={styles.label} for="price">Unlock Price</label>
+                <input className={styles.input} type="text" id="price" name="price"
+                onChange={e => {
+                  setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: e.target.value}));
+                }} />
+              </div>
+              </div>
+              <div className={styles.buttonDiv}>
+                <button onClick={newTrust} className={styles.button}>Submit</button>
+              </div>
             </div>
           </div>
+
         );
       }
     } else {
@@ -159,26 +166,8 @@ export default function Home() {
   }, [walletConnected]);
 
   return (
-  <div>
-    <Head>
-      <title>LinkedTrust</title>
-      <meta name="description" content="Decentralized Trust" />
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
-    <div className={styles.main}>
-      <div>
-        <h1 className={styles.title}>Welcome to LinkedTrust!</h1>
-        <div className={styles.description}>
-          A platform for creating decentralized trusts.
-        </div>
-        {renderTrustForm()}
-        <canvas id="chart"></canvas>
-      </div>
+    <div>
+      {renderTrustForm()}
     </div>
-
-    <footer className={styles.footer}>
-      Made with &#10084; by cmoorelabs
-    </footer>
-  </div>
-  );
+    );
 }
