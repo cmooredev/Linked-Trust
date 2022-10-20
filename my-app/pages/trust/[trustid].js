@@ -1,9 +1,9 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.css";
+import styles from "../../styles/Home.module.css";
 import Web3Modal from "web3modal";
 import { ethers, providers, Contract } from "ethers";
 import { useEffect, useRef, useState } from "react";
-import { LINKED_TRUST_CONTRACT_ADDRESS, abi } from "../constants";
+import { LINKED_TRUST_CONTRACT_ADDRESS, abi } from "../../constants";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from "chart.js";
 import { Bar, Line, Scatter, Bubble } from "react-chartjs-2";
 import { useRouter } from 'next/router'
@@ -12,6 +12,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 export default function Trust() {
   const router = useRouter();
+  console.log(router.pathname);
 
   const { trust_name, unlock_time, unlock_price, trust_id, wallet_connected, new_trust_created } = router.query;
   let unlock_unix_timestamp = +unlock_time;

@@ -22,7 +22,6 @@ const searchStyle = {
 
 const search = (e) => {
   console.log(e.target[0].value);
-  e.preventDefault();
 };
 
 const Header = () => {
@@ -31,8 +30,8 @@ const Header = () => {
     <a style={navLinks} href="/">LinkedTrust</a>
     <a style={navLinks} href="/about">About</a>
     <a style={navLinks} href="/account">Account</a>
-    <form onSubmit={search}>
-    <input style={searchStyle} type="text" placeholder="Search.."></input>
+    <form onSubmit={search} action="/trust">
+    <input style={searchStyle} id="trust" name="id" type="text" placeholder="Search.."></input>
     </form>
   </header>);
 };

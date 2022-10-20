@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 export default function Home() {
 
   //next router
-  const router = useRouter()
+  const router = useRouter();
 
   //connect wallet
   const [walletConnected, setWalletConnected] = useState(false);
