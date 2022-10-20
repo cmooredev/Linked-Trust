@@ -38,9 +38,7 @@ export default function Trust() {
 
   //*******************************  fix this later
   const [isActiveTrust, setActiveTrust] = useState(true);
-  if(isActiveTrust == undefined){
-    setActiveTrust(false);
-  }
+
   //create ref to web3 web3modal
   const web3ModalRef = useRef();
 
@@ -108,13 +106,42 @@ export default function Trust() {
       abi,
       signer
     );
-    console.log(beneficiary.beneficiary);
     let tx = await linkingTrustContract.setBeneficiary(beneficiary.beneficiary, parsedID);
+    setLoading(true);
     console.log('loading');
     await tx.wait();
     console.log('done');
+    setLoading(false);
   };
 
+  const addBeneficiaryButton = () => {
+    if(!loading){
+      return (
+        <div className={styles.card}>
+          <div className={styles.formcontainer}>
+          <div className={styles.form}>
+            <label title="Add a beneficiary" className={styles.label} for="beneficiary">Beneficiary</label>
+            <input className={styles.input} type="text" id="beneficiary" name="beneficiary"
+            onChange={e => {
+              setBeneficiaryToAdd(prevBeneficiary => ({...prevBeneficiary, beneficiary: e.target.value}));
+            }} />
+          </div>
+          </div>
+          <div className={styles.buttonDiv}>
+            <button onClick={addBeneficiary}  className={styles.button}>Add</button>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={styles.card}>
+          <div className={styles.description}>
+            <p className={styles.loading}>Waiting for transaction</p>
+          </div>
+        </div>
+      );
+    }
+  };
 
   const renderChart = () => {
     const data = {
@@ -125,6 +152,8 @@ export default function Trust() {
         },
       ],
     };
+
+
 
     const options = {
       plugins: {
@@ -155,7 +184,6 @@ export default function Trust() {
       },
     };
       if (walletConnected) {
-        if(isActiveTrust) {
           getTrustStats();
           return (
             <div>
@@ -176,25 +204,8 @@ export default function Trust() {
                 <div className={styles.card}>
                   <Line data={data} className={styles.data} options={options}/>
                 </div>
-
-
               </div>
-
-              <div className={styles.card}>
-                <div className={styles.formcontainer}>
-                <div className={styles.form}>
-                  <label title="Add a beneficiary" className={styles.label} for="beneficiary">Beneficiary</label>
-                  <input className={styles.input} type="text" id="beneficiary" name="beneficiary"
-                  onChange={e => {
-                    setBeneficiaryToAdd( prevBeneficiary => ({...prevBeneficiary, beneficiary: e.target.value}));
-                    console.log(beneficiary);
-                  }} />
-                </div>
-                </div>
-                <div className={styles.buttonDiv}>
-                  <button onClick={addBeneficiary}  className={styles.button}>Add</button>
-                </div>
-              </div>
+              {addBeneficiaryButton()}
             </div>
             );
           } else {
@@ -205,25 +216,10 @@ export default function Trust() {
                   <meta name="description" content="Decentralized Trust" />
                   <link rel="icon" href="/favicon.ico" />
                 </Head>
-                <div className={styles.main}>
-                  <div className={styles.intro}>
-                    <div className={styles.description}>
-                      <p>You are not on an active trust.</p>
-                    </div>
-                  </div>
-                </div>
+
               </div>
               );
           }
-      } else {
-        return (
-          <div className={styles.main}>
-              <button onClick={connectWallet} className={styles.button}>
-                Connect your wallet
-              </button>
-          </div>
-        );
-      }
   };
 
   useEffect(() => {
