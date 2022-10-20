@@ -73,6 +73,8 @@ export default function Home() {
                    trust_id : id,
                    unlock_time: trustParam.unlock_time,
                    unlock_price: trustParam.unlock_price,
+                   wallet_connected: walletConnected,
+                   new_trust_created: newTrustCreated,
           }
         }, '/trust')
       });
@@ -99,10 +101,12 @@ export default function Home() {
       if (loading) {
         return (
           <div className={styles.main}>
+          <div className={styles.card}>
             <div className={styles.loading}>
               <h2>Creating New Trust...</h2>
               <p>Please Wait</p>
-            </div>;
+            </div>
+          </div>
           </div>
         );
       } else {
@@ -110,27 +114,27 @@ export default function Home() {
 
           <div className={styles.main}>
             <div className={styles.intro}>
-              <h1 className={styles.title}>Welcome to LinkedTrust!</h1>
-              <div className={styles.description}>
+              <h1 className={styles.title}>LinkedTrust!</h1>
+              <div className={styles.tagline}>
                 A platform for creating decentralized trusts.
               </div>
             </div>
             <div className={styles.card}>
               <div className={styles.formcontainer}>
               <div className={styles.form}>
-                <label className={styles.label} for="name">Trust name</label>
+                <label title="Set a name for your trust." className={styles.label} for="name">Trust name</label>
                 <input className={styles.input} type="text" id="name" name="name"
                 onChange={e => {
                   setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: e.target.value}));
                 }} />
-                <label className={styles.label} for="time">Unlock Time</label>
+                <label title="Choose the date the beneficiares can access funds." className={styles.label} for="time">Unlock Time</label>
                 <input className={styles.input} type="datetime-local" id="time" name="time"
                 onChange={e => {
                   let dateToUnix = +new Date(e.target.value);
                   console.log('first ' + dateToUnix);
                   setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: dateToUnix }));
                 }} />
-                <label className={styles.label} for="price">Unlock Price</label>
+                <label title="Set an unlock price for the trust. Beneficiaries will be able to partially withdraw funds when trust is above this threshold." className={styles.label} for="price">Unlock Price</label>
                 <input className={styles.input} type="text" id="price" name="price"
                 onChange={e => {
                   setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: e.target.value}));
@@ -147,9 +151,12 @@ export default function Home() {
       }
     } else {
       return (
+        <div className={styles.main}>
+        <h1 className={styles.title}>LinkedTrust</h1>
         <button onClick={connectWallet} className={styles.button}>
           Connect your wallet
         </button>
+        </div>
       );
     }
   };

@@ -1,4 +1,4 @@
-export const LINKED_TRUST_CONTRACT_ADDRESS = "0x3a2333e545F02F2C6fdb0526611625A062A40010";
+export const LINKED_TRUST_CONTRACT_ADDRESS = "0x2E48762c97bEC1374034F61Fc972563DB66a003A";
 export const abi = [
     {
       "inputs": [],
@@ -148,69 +148,27 @@ export const abi = [
           "type": "uint256"
         }
       ],
-      "name": "getTrustBeneficiaries",
+      "name": "getTrust",
       "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
         {
           "internalType": "uint256",
-          "name": "_trustID",
+          "name": "",
           "type": "uint256"
-        }
-      ],
-      "name": "getTrustCreator",
-      "outputs": [
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
         {
           "internalType": "address",
           "name": "",
           "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
+        },
         {
-          "internalType": "uint256",
-          "name": "_trustID",
-          "type": "uint256"
-        }
-      ],
-      "name": "getTrustUnlockPrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
+          "internalType": "address[]",
           "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_trustID",
-          "type": "uint256"
-        }
-      ],
-      "name": "getTrustUnlockTime",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
+          "type": "address[]"
         }
       ],
       "stateMutability": "view",

@@ -4,21 +4,32 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: 'Apple Chancery', Monaca, monospace;
+  font-family: Courier;
   background-color: #215cff;
   color: black;
 }
 
-.loading {
+.data {
+  padding: 20px;
+}
+
+.tagline {
+  line-height: 1;
+  font-size: 1.25rem;
   color: white;
-  font-size: 2rem;
+}
+
+.loading {
+  padding: 20px;
+  color: black;
+  font-size: 1.5rem;
   text-align: center;
 }
 
 .card {
   background-color: #edf2fc;
   border-radius: 5px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
   transition: 0.3s;
   margin: 50px;
 }
@@ -39,6 +50,11 @@
 .label {
   grid-column: 1/2;
   margin: 10px;
+  font-size: 1.5rem;
+}
+
+.label:hover {
+  text-decoration: underline;
 }
 
 .input, .button {
@@ -58,34 +74,35 @@
 }
 
 .header {
-  font-family: 'Apple Chancery', Monaca, monospace;
   display: flex;
-  padding: 1.2rem 0;
-  border-top: 1px solid #eaeaea;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #eaeaea;
   background-color: #edf2fc;
   color: black;
 }
 
 .footer {
-  font-family: 'Apple Chancery', Monaca, monospace;
   justify-content: center;
   display: flex;
   padding: 1.2rem 0;
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid black;
   background-color: #edf2fc;
-  color: black;
+  color: white;
 }
 
 .title {
+  align-items: center;
   font-size: 3rem;
   margin-bottom: 0;
   color: white;
+  margin: 3%;
 }
 
 .description {
   line-height: 1;
   font-size: 1.25rem;
-  color: white;
+  color: black;
+  padding: 20px;
 }
 
 .buttonDiv {

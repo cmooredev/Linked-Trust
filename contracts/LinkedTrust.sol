@@ -80,23 +80,8 @@ contract LinkedTrust {
         emit NewBeneficiary(_trustID, _beneficiary);
     }
 
-    function getTrustBeneficiaries(uint _trustID) public view returns (address[] memory){
-        return trusts[_trustID].beneficiaryList;
-    }
-
-    function getTrustUnlockTime(uint _trustID) public view returns (uint){
-        Trust storage trust = trusts[_trustID];
-        return trust.unlockTime;
-    }
-
-    function getTrustCreator(uint _trustID) public view returns (address) {
-        Trust storage trust = trusts[_trustID];
-        return (trust.creator);
-    }
-
-    function getTrustUnlockPrice(uint _trustID) public view returns (uint) {
-        Trust storage trust = trusts[_trustID];
-        return (trust.unlockPrice);
+    function getTrust(uint _trustID) public view returns (uint, uint, address, address[] memory) {
+        return (trusts[_trustID].unlockTime, trusts[_trustID].unlockPrice, trusts[_trustID].creator, trusts[_trustID].beneficiaryList);
     }
 
     //allow anyone to fund a trust
