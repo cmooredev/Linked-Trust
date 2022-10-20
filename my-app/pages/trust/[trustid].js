@@ -31,6 +31,11 @@ export default function Trust() {
       trust_id: ""
   });
 
+  const [beneficiary, setBeneficiaryToAdd] = useState(
+    {
+      beneficiary: "",
+  });
+
   //*******************************  fix this later
   const [isActiveTrust, setActiveTrust] = useState(true);
   if(isActiveTrust == undefined){
@@ -75,11 +80,39 @@ export default function Trust() {
     );
     let trust = await linkingTrustContract.getTrust(parsedID);
     setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: trust[0]}));
-    setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: trust[1].toString()}));
     setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: trust[2].toString()}));
     setTrustParam( prevTrustParam => ({...prevTrustParam, creator: trust[3]}));
     let unlock_unix_timestamp = trust[1].toString();
-    let date = new Date(unlock_unix_timestamp);
+    let date = new Date(unlock_unix_timestamp/1);
+    let month = date.getMonth();
+    // Minutes part from the timestamp
+    let day = date.getDay();
+    // Seconds part from the timestamp
+    let year = date.getFullYear();
+    let hours = date.getHours();
+    let half = "AM";
+    if (hours > 12) {
+      hours -= 12;
+      half = "PM";
+    }
+    let minutes = date.getMinutes();
+    let fullData = month + '/' + day +'/' + year + ' ' + hours + ':' + minutes + half;
+
+    setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: fullData}));
+  };
+
+  const addBeneficiary = async () => {
+    const signer = await getProviderOrSigner(true);
+    const linkingTrustContract = new Contract(
+      LINKED_TRUST_CONTRACT_ADDRESS,
+      abi,
+      signer
+    );
+    console.log(beneficiary.beneficiary);
+    let tx = await linkingTrustContract.setBeneficiary(beneficiary.beneficiary, parsedID);
+    console.log('loading');
+    await tx.wait();
+    console.log('done');
   };
 
 
@@ -88,7 +121,7 @@ export default function Trust() {
       labels: ["Mon", "Wed", "Fri"],
       datasets: [
         {
-          data: [ trustParam.unlock_price, 2, trustParam.unlock_time],
+          data: [ trustParam.unlock_price, 2, 500],
         },
       ],
     };
@@ -131,7 +164,7 @@ export default function Trust() {
                 <meta name="description" content="Decentralized Trust" />
                 <link rel="icon" href="/favicon.ico" />
               </Head>
-              <div className={styles.main}>
+              <div className={styles.container}>
                 <div className={styles.card}>
                   <div className={styles.description}>
                     <h3>Name: {trustParam.trust_name}</h3>
@@ -142,6 +175,24 @@ export default function Trust() {
                 </div>
                 <div className={styles.card}>
                   <Line data={data} className={styles.data} options={options}/>
+                </div>
+
+
+              </div>
+
+              <div className={styles.card}>
+                <div className={styles.formcontainer}>
+                <div className={styles.form}>
+                  <label title="Add a beneficiary" className={styles.label} for="beneficiary">Beneficiary</label>
+                  <input className={styles.input} type="text" id="beneficiary" name="beneficiary"
+                  onChange={e => {
+                    setBeneficiaryToAdd( prevBeneficiary => ({...prevBeneficiary, beneficiary: e.target.value}));
+                    console.log(beneficiary);
+                  }} />
+                </div>
+                </div>
+                <div className={styles.buttonDiv}>
+                  <button onClick={addBeneficiary}  className={styles.button}>Add</button>
                 </div>
               </div>
             </div>

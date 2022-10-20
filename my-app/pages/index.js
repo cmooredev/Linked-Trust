@@ -103,7 +103,7 @@ export default function Home() {
           <div className={styles.main}>
           <div className={styles.card}>
             <div className={styles.loading}>
-              <h2>Creating New Trust...</h2>
+              <h2>Creating New Trust</h2>
               <p>Please Wait</p>
             </div>
           </div>

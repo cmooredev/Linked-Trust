@@ -9,6 +9,17 @@
   color: black;
 }
 
+.container {
+  min-height: 40vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-family: Courier;
+  background-color: #215cff;
+  color: black;
+}
+
 .data {
   padding: 20px;
 }
@@ -31,7 +42,8 @@
   border-radius: 5px;
   box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
   transition: 0.3s;
-  margin: 50px;
+  margin: 10px;
+  margin-top: 0;
 }
 
 .card:hover {
