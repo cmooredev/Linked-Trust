@@ -31,8 +31,8 @@ export default function Trust() {
       trust_id: ""
   });
 
-  //
-  const [isActiveTrust, setActiveTrust] = useState(new_trust_created);
+  //*******************************  fix this later
+  const [isActiveTrust, setActiveTrust] = useState(true);
   if(isActiveTrust == undefined){
     setActiveTrust(false);
   }
@@ -103,9 +103,9 @@ export default function Trust() {
         line: {
           tension: 0,
           borderWidth: 2,
-          borderColor: "rgba(47, 97, 68, 1)",
+          borderColor: "rgba(47, 97, 255, 1)",
           fill: "start",
-          backgroundColor: "rgba(47, 97, 68, 0.3)",
+          backgroundColor: "rgba(47, 97, 255, 0.3)",
         },
         point: {
           radius: 0,
@@ -134,7 +134,6 @@ export default function Trust() {
               <div className={styles.main}>
                 <div className={styles.card}>
                   <div className={styles.description}>
-
                     <h3>Name: {trustParam.trust_name}</h3>
                     <p>Unlock Time: {trustParam.unlock_time}</p>
                     <p>Unlock Price: {trustParam.unlock_price}</p>
