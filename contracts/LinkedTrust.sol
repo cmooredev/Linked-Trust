@@ -25,7 +25,8 @@ contract LinkedTrust {
 
     //struct to hold a new Trust
     struct Trust {
-
+        //name of trust
+        string name;
         //current trust value
         uint currentValue;
 
@@ -53,12 +54,13 @@ contract LinkedTrust {
         owner = payable(msg.sender);
     }
 
-    function createNewTrust(uint _unlockTime, uint _unlockPrice) public payable {
+    function createNewTrust(string memory _name, uint _unlockTime, uint _unlockPrice) public payable {
         require(block.timestamp < _unlockTime, "Unlock time should be in the future");
         //increment number of trusts and then use this as the index for trust mapping
         //create new instance of a trust
         Trust storage trust = trusts[totalNumberOfTrusts];
         //set all coniditions
+        trust.name = _name;
         trust.unlockTime = _unlockTime;
         trust.unlockPrice = _unlockPrice;
         trust.creator = msg.sender;
@@ -80,8 +82,8 @@ contract LinkedTrust {
         emit NewBeneficiary(_trustID, _beneficiary);
     }
 
-    function getTrust(uint _trustID) public view returns (uint, uint, address, address[] memory) {
-        return (trusts[_trustID].unlockTime, trusts[_trustID].unlockPrice, trusts[_trustID].creator, trusts[_trustID].beneficiaryList);
+    function getTrust(uint _trustID) public view returns (string memory, uint, uint, address, address[] memory) {
+        return (trusts[_trustID].name, trusts[_trustID].unlockTime, trusts[_trustID].unlockPrice, trusts[_trustID].creator, trusts[_trustID].beneficiaryList);
     }
 
     //allow anyone to fund a trust

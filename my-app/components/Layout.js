@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import Router from 'next/router';
 
 const headerStyle = {
   display: "flex",
@@ -21,16 +23,23 @@ const searchStyle = {
 };
 
 const search = (e) => {
-  console.log(e.target[0].value);
+  Router.push(`/trust/${e.target[0].value}`, undefined, { shallow: true });
+  e.preventDefault();
 };
 
 const Header = () => {
   return (
   <header style={headerStyle}>
-    <a style={navLinks} href="/">LinkedTrust</a>
-    <a style={navLinks} href="/about">About</a>
-    <a style={navLinks} href="/account">Account</a>
-    <form onSubmit={search} action="/trust">
+    <Link href="/">
+      <a style={navLinks}>LinkedTrust</a>
+    </Link>
+    <Link href="/about">
+      <a style={navLinks}>About</a>
+    </Link>
+    <Link href="/account">
+      <a style={navLinks} href="/account">Account</a>
+    </Link>
+    <form onSubmit={search}>
     <input style={searchStyle} id="trust" name="id" type="text" placeholder="Search.."></input>
     </form>
   </header>);

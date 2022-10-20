@@ -12,17 +12,24 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 export default function Trust() {
   const router = useRouter();
-  console.log(router.pathname);
 
-  const { trust_name, unlock_time, unlock_price, trust_id, wallet_connected, new_trust_created } = router.query;
-  let unlock_unix_timestamp = +unlock_time;
-  let date = new Date(unlock_unix_timestamp);
+  const { wallet_connected, new_trust_created } = router.query;
+  let parsedID = router.asPath.split('/trust/')[1];
 
   //connect wallet
-  const [walletConnected, setWalletConnected] = useState(wallet_connected);
+  const [walletConnected, setWalletConnected] = useState(false);
 
   //loading when waiting for transaction
   const [loading, setLoading] = useState(false);
+
+  const [trustParam, setTrustParam] = useState(
+    {
+      trust_id: "",
+      trust_name: "",
+      unlock_time: "",
+      unlock_price: "",
+      trust_id: ""
+  });
 
   //
   const [isActiveTrust, setActiveTrust] = useState(new_trust_created);
@@ -59,13 +66,29 @@ export default function Trust() {
     }
   };
 
+  const getTrustStats = async () => {
+    const signer = await getProviderOrSigner(true);
+    const linkingTrustContract = new Contract(
+      LINKED_TRUST_CONTRACT_ADDRESS,
+      abi,
+      signer
+    );
+    let trust = await linkingTrustContract.getTrust(parsedID);
+    setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: trust[0]}));
+    setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: trust[1].toString()}));
+    setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: trust[2].toString()}));
+    setTrustParam( prevTrustParam => ({...prevTrustParam, creator: trust[3]}));
+    let unlock_unix_timestamp = trust[1].toString();
+    let date = new Date(unlock_unix_timestamp);
+  };
+
 
   const renderChart = () => {
     const data = {
       labels: ["Mon", "Wed", "Fri"],
       datasets: [
         {
-          data: [1, 2, 5],
+          data: [ trustParam.unlock_price, 2, trustParam.unlock_time],
         },
       ],
     };
@@ -100,6 +123,7 @@ export default function Trust() {
     };
       if (walletConnected) {
         if(isActiveTrust) {
+          getTrustStats();
           return (
             <div>
               <Head>
@@ -110,10 +134,11 @@ export default function Trust() {
               <div className={styles.main}>
                 <div className={styles.card}>
                   <div className={styles.description}>
-                    <h3>Name: {trust_name}</h3>
-                    <p>Unlock Time: {date.toLocaleString()}</p>
-                    <p>Unlock Price: {unlock_price}</p>
-                    <p>Trust ID: {trust_id}</p>
+
+                    <h3>Name: {trustParam.trust_name}</h3>
+                    <p>Unlock Time: {trustParam.unlock_time}</p>
+                    <p>Unlock Price: {trustParam.unlock_price}</p>
+                    <p>Trust ID: {parsedID}</p>
                   </div>
                 </div>
                 <div className={styles.card}>

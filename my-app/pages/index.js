@@ -61,22 +61,22 @@ export default function Home() {
       );
 
       const tx = await linkingTrustContract.createNewTrust(
-        trustParam.unlock_time, trustParam.unlock_price
+        trustParam.trust_name ,trustParam.unlock_time, trustParam.unlock_price
       );
       setLoading(true);
       linkingTrustContract.on("NewTrust", (trustID, when, creator) => {
         id = trustID.toString();
         setTrustParam( prevTrustParam => ({...prevTrustParam, id}));
         router.push({
-          pathname: '/trust',
+          pathname: `/trust/${id}`,
           query: { trust_name: trustParam.trust_name,
                    trust_id : id,
                    unlock_time: trustParam.unlock_time,
                    unlock_price: trustParam.unlock_price,
                    wallet_connected: walletConnected,
                    new_trust_created: newTrustCreated,
-          }
-        }, '/trust')
+          },
+        }, `/trust/${id}`)
       });
       await tx.wait();
       setLoading(false);

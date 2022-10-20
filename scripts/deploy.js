@@ -8,8 +8,11 @@ const hre = require("hardhat");
 
 async function main() {
 
+  console.log('GETTING READY');
   const LinkedTrust = await hre.ethers.getContractFactory("LinkedTrust");
+  console.log('GOT CONTRACT');
   const linkedTrust = await LinkedTrust.deploy();
+  console.log('AWAITED');
 
   await linkedTrust.deployed();
 
