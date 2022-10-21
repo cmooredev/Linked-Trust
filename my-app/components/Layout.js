@@ -24,6 +24,7 @@ const searchStyle = {
 
 const search = (e) => {
   Router.push(`/trust/${e.target[0].value}`, undefined, { shallow: true });
+  console.log(e.target[0].value);
   e.preventDefault();
 };
 

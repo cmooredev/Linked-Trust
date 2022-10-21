@@ -14,22 +14,26 @@ export default function Trust() {
   const router = useRouter();
 
   const { wallet_connected, new_trust_created } = router.query;
-  let parsedID = router.asPath.split('/trust/')[1];
+
 
   //connect wallet
   const [walletConnected, setWalletConnected] = useState(false);
 
+  const [connectedAddress, setConnectedAddress] = useState("");
+
   //loading when waiting for transaction
   const [loading, setLoading] = useState(false);
 
+  const [trustLoaded, setTrustLoaded] = useState(false);
   const [trustParam, setTrustParam] = useState(
     {
       trust_id: "",
       trust_name: "",
       unlock_time: "",
       unlock_price: "",
-      trust_id: ""
+      creator: ""
   });
+
 
   const [beneficiary, setBeneficiaryToAdd] = useState(
     {
@@ -54,6 +58,9 @@ export default function Trust() {
 
     if (needSigner) {
       const signer = web3Provider.getSigner();
+      let address = await signer.getAddress();
+      console.log(address);
+      setConnectedAddress(address);
       return signer;
     }
     return web3Provider;
@@ -63,6 +70,7 @@ export default function Trust() {
     try {
       await getProviderOrSigner();
       setWalletConnected(true);
+
 
     } catch (err) {
       console.error(err);
@@ -76,7 +84,10 @@ export default function Trust() {
       abi,
       signer
     );
+    let parsedID = router.asPath.split('/trust/')[1];
+    console.log(`its undefined huh???? ${parsedID}`);
     let trust = await linkingTrustContract.getTrust(parsedID);
+    setTrustParam( prevTrustParam => ({...prevTrustParam, trust_id: parsedID}));
     setTrustParam( prevTrustParam => ({...prevTrustParam, trust_name: trust[0]}));
     setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_price: trust[2].toString()}));
     setTrustParam( prevTrustParam => ({...prevTrustParam, creator: trust[3]}));
@@ -97,6 +108,7 @@ export default function Trust() {
     let fullData = month + '/' + day +'/' + year + ' ' + hours + ':' + minutes + half;
 
     setTrustParam( prevTrustParam => ({...prevTrustParam, unlock_time: fullData}));
+    setTrustLoaded(true);
   };
 
   const addBeneficiary = async () => {
@@ -106,7 +118,7 @@ export default function Trust() {
       abi,
       signer
     );
-    let tx = await linkingTrustContract.setBeneficiary(beneficiary.beneficiary, parsedID);
+    let tx = await linkingTrustContract.setBeneficiary(beneficiary.beneficiary, trustParam.trust_id);
     setLoading(true);
     console.log('loading');
     await tx.wait();
@@ -116,22 +128,33 @@ export default function Trust() {
 
   const addBeneficiaryButton = () => {
     if(!loading){
-      return (
-        <div className={styles.card}>
-          <div className={styles.formcontainer}>
-          <div className={styles.form}>
-            <label title="Add a beneficiary" className={styles.label} for="beneficiary">Beneficiary</label>
-            <input className={styles.input} type="text" id="beneficiary" name="beneficiary"
-            onChange={e => {
-              setBeneficiaryToAdd(prevBeneficiary => ({...prevBeneficiary, beneficiary: e.target.value}));
-            }} />
+      if(trustParam.creator == connectedAddress){
+        return (
+          <div className={styles.card}>
+            <div className={styles.formcontainer}>
+            <div className={styles.form}>
+              <label title="Add a beneficiary" className={styles.label} for="beneficiary">Beneficiary</label>
+              <input className={styles.input} type="text" id="beneficiary" name="beneficiary"
+              onChange={e => {
+                setBeneficiaryToAdd(prevBeneficiary => ({...prevBeneficiary, beneficiary: e.target.value}));
+              }} />
+            </div>
+            </div>
+            <div className={styles.buttonDiv}>
+              <button onClick={addBeneficiary}  className={styles.button}>Add</button>
+            </div>
           </div>
+        );
+      } else {
+        return (
+          <div className={styles.card}>
+            <div className={styles.formcontainer}>
+              <h2>Beneficiaries</h2>
+              <h3>Access denied.</h3>
+            </div>
           </div>
-          <div className={styles.buttonDiv}>
-            <button onClick={addBeneficiary}  className={styles.button}>Add</button>
-          </div>
-        </div>
-      );
+        );
+      }
     } else {
       return (
         <div className={styles.card}>
@@ -141,20 +164,24 @@ export default function Trust() {
         </div>
       );
     }
+
+
   };
 
+  const data = {
+    labels: ["Mon", "Wed", "Fri"],
+    datasets: [
+      {
+        data: [ trustParam.unlock_price, 2, 500],
+      },
+    ],
+  };
+
+
+
+
+
   const renderChart = () => {
-    const data = {
-      labels: ["Mon", "Wed", "Fri"],
-      datasets: [
-        {
-          data: [ trustParam.unlock_price, 2, 500],
-        },
-      ],
-    };
-
-
-
     const options = {
       plugins: {
         legend: {
@@ -183,8 +210,12 @@ export default function Trust() {
         },
       },
     };
+
       if (walletConnected) {
+        if (!trustLoaded) {
           getTrustStats();
+          console.log('loaded trust');
+        }
           return (
             <div>
               <Head>
@@ -198,7 +229,7 @@ export default function Trust() {
                     <h3>Name: {trustParam.trust_name}</h3>
                     <p>Unlock Time: {trustParam.unlock_time}</p>
                     <p>Unlock Price: {trustParam.unlock_price}</p>
-                    <p>Trust ID: {parsedID}</p>
+                    <p>Trust ID: {trustParam.trust_id}</p>
                   </div>
                 </div>
                 <div className={styles.card}>
@@ -232,6 +263,10 @@ export default function Trust() {
       connectWallet();
     }
   }, [walletConnected]);
+
+  useEffect(() => {
+    setTrustLoaded(false);
+  }, [router.asPath]);
 
   return (
   <div>
